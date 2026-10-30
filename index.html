@@ -187,23 +187,23 @@ if (!tg) {
             new Date().toLocaleDateString("en-CA");
 
         function saveEvent() {
-            const title = document.getElementById("eventTitle").value.trim();
-            const date = document.getElementById("eventDate").value;
-            const time = getSelected("hours") + ":" + getSelected("minutes");
+    const title = document.getElementById("eventTitle").value.trim();
+    const date = document.getElementById("eventDate").value;
+    const time = getSelected("hours") + ":" + getSelected("minutes");
 
-            if (!title || !date) {
-                alert("Заполни название и дату события");
-                return;
-            }
+    if (!title || !date) {
+        alert("Заполни название и дату события");
+        return;
+    }
 
-            const event = { title, date, time };
+    const event = { title, date, time };
 
-            if (tg.initData) {
-                tg.sendData(JSON.stringify(event));
-            } else {
-                alert("Демонстрация: " + JSON.stringify(event));
-            }
-        }
+    try {
+        tg.sendData(JSON.stringify(event));
+    } catch (error) {
+        alert("Ошибка отправки: " + error.message);
+    }
+}
 
         setTimeout(() => {
             document.getElementById("hours").scrollTop = 75;
