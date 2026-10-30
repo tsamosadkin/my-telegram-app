@@ -135,14 +135,21 @@
     <button onclick="saveEvent()">Сохранить событие</button>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-alert(
-    tg.initData
-        ? "Telegram подключён! ✅"
-        : "Telegram не передал данные ❌"
-);
+const tg = window.Telegram?.WebApp;
+
+if (!tg) {
+    alert("Ошибка: Telegram WebApp API не загружен");
+} else {
+    tg.ready();
+    tg.expand();
+
+    alert(
+        "Telegram API найден!\n" +
+        "initData: " + (tg.initData ? "ЕСТЬ" : "ПУСТО") + "\n" +
+        "sendData: " + typeof tg.sendData + "\n" +
+        "platform: " + tg.platform
+    );
+}
         function createWheel(id, max, step = 1) {
             const wheel = document.getElementById(id);
 
