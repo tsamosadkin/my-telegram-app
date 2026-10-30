@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои события</title>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px 20px;
+            background: var(--tg-theme-bg-color, #f5f5f7);
+            color: var(--tg-theme-text-color, #222);
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        h2 {
+            margin-top: 10px;
+            font-size: 26px;
+        }
+
+        .label {
+            display: block;
+            margin: 25px 0 12px;
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #888);
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            background: var(--tg-theme-secondary-bg-color, #eee);
+            color: var(--tg-theme-text-color, #222);
+            font-size: 17px;
+            outline: none;
+        }
+
+        .wheels {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            height: 190px;
+            overflow: hidden;
+            position: relative;
+            background: var(--tg-theme-secondary-bg-color, #eee);
+            border-radius: 18px;
+        }
+
+        .wheels::after {
+            content: "";
+            position: absolute;
+            top: 75px;
+            left: 10px;
+            right: 10px;
+            height: 40px;
+            border-top: 1px solid #8885;
+            border-bottom: 1px solid #8885;
+            pointer-events: none;
+        }
+
+        .wheel {
+            width: 75px;
+            height: 190px;
+            overflow-y: auto;
+            scroll-snap-type: y mandatory;
+            scrollbar-width: none;
+            text-align: center;
+        }
+
+        .wheel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .wheel div {
+            height: 40px;
+            line-height: 40px;
+            scroll-snap-align: center;
+            font-size: 23px;
+            color: var(--tg-theme-text-color, #222);
+        }
+
+        .spacer {
+            height: 75px !important;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 30px;
+            padding: 17px;
+            border: none;
+            border-radius: 14px;
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, white);
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .preview {
+            margin-top: 18px;
+            text-align: center;
+            color: var(--tg-theme-hint-color, #888);
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Новое событие 📅</h2>
+
+    <label class="label">Название события</label>
+    <input id="eventTitle" placeholder="Например, день рождения">
+
+    <label class="label">Дата</label>
+    <input id="eventDate" type="date">
+
+    <label class="label">Время</label>
+
+    <div class="wheels">
+        <div class="wheel" id="hours"></div>
+        <div class="wheel" id="minutes"></div>
+    </div>
+
+    <div class="preview" id="preview">Выбери время</div>
+
+    <button onclick="saveEvent()">Сохранить событие</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        function createWheel(id, max, step = 1) {
+            const wheel = document.getElementById(id);
+
+            wheel.innerHTML = '<div class="spacer"></div>';
+
+            for (let i = 0; i < max; i += step) {
+                const item = document.createElement("div");
+                item.textContent = String(i).padStart(2, "0");
+                wheel.appendChild(item);
+            }
+
+            wheel.innerHTML += '<div class="spacer"></div>';
+        }
+
+        createWheel("hours", 24);
+        createWheel("minutes", 60);
+
+        function getSelected(id) {
+            const wheel = document.getElementById(id);
+            const index = Math.round(wheel.scrollTop / 40);
+            const items = wheel.querySelectorAll("div:not(.spacer)");
+            return items[Math.min(index, items.length - 1)].textContent;
+        }
+
+        function updatePreview() {
+            document.getElementById("preview").textContent =
+                getSelected("hours") + ":" + getSelected("minutes");
+        }
+
+        document.querySelectorAll(".wheel").forEach(wheel => {
+            wheel.addEventListener("scroll", updatePreview);
+        });
+
+        document.getElementById("eventDate").value =
+            new Date().toLocaleDateString("en-CA");
+
+        function saveEvent() {
+            const title = document.getElementById("eventTitle").value.trim();
+            const date = document.getElementById("eventDate").value;
+            const time = getSelected("hours") + ":" + getSelected("minutes");
+
+            if (!title || !date) {
+                alert("Заполни название и дату события");
+                return;
+            }
+
+            const event = { title, date, time };
+
+            if (tg.initData) {
+                tg.sendData(JSON.stringify(event));
+            } else {
+                alert("Демонстрация: " + JSON.stringify(event));
+            }
+        }
+
+        setTimeout(() => {
+            document.getElementById("hours").scrollTop = 75;
+            document.getElementById("minutes").scrollTop = 75;
+            updatePreview();
+        }, 100);
+    </script>
+
+</body>
+</html>
