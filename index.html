@@ -138,7 +138,11 @@
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-
+alert(
+    tg.initData
+        ? "Telegram подключён! ✅"
+        : "Telegram не передал данные ❌"
+);
         function createWheel(id, max, step = 1) {
             const wheel = document.getElementById(id);
 
